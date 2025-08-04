@@ -5,9 +5,9 @@ The Isabelle theories are an enhancement of the theories developed as part of th
 
 ## Structure of the Repository
 
-- **`/isabelle-theories`**: This folder contains the current Isabelle theories and the documents built from these. The latter presents the Isabelle/HOL proofs.
+- **`/isabelle-theories`**: This folder contains the current Isabelle theories and the documents built from these. The latter present the Isabelle/HOL proofs.
   
-- **`/master-thesis`**: This folder contains the master's thesis as well as the originally submitted isabelle theories and the corresponding documents built. These files correspond to the version of the formalisation the master's thesis references.
+- **`/master-thesis`**: This folder contains the master's thesis as well as the originally submitted Isabelle theories and the corresponding documents built. These files correspond to the version of the formalisation the master's thesis references.
 
 ## Overview
 
