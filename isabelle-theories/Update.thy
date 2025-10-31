@@ -22,7 +22,7 @@ component of energies. We now introduce a datatype such that updates can be repr
 datatype update_component = zero | minus_one | min_set "nat set" | plus_one
 type_synonym update = "update_component list" 
 
-abbreviation "valid_update u \<equiv> (\<forall>i D. u ! i = min_set D 
+abbreviation "valid_update u \<equiv> (\<forall>i D. i < length u \<longrightarrow> u ! i = min_set D
                                     \<longrightarrow> D \<noteq> {} \<and> D \<subseteq> {x. x < length u})"
 
 text \<open>Now the application of updates \<open>apply_update\<close> will be defined.\<close>
@@ -144,7 +144,8 @@ lemma updates_monotonic:
       next
         case min_set
         from this obtain A where "u ! n = min_set A" by auto
-        hence " A \<subseteq> {x. x < length e}" using assms(3)  by (metis apply_update.elims assms(1))
+        hence " A \<subseteq> {x. x < length e}" using assms(3)
+          using \<open>n < length e\<close> apply_update.simps assms(1) by presburger
         hence "\<forall>a \<in> A. e!a \<le> e'!a" using assms(2) energy_leq_def
           by blast
         have "\<forall>a\<in> A. (Min (set (nths e A))) \<le> e! a" proof
@@ -160,7 +161,7 @@ lemma updates_monotonic:
           by (smt (verit) mem_Collect_eq)        
 
         from assms(2) have "A\<noteq>{}"
-          using \<open>u ! n = min_set A\<close> assms(3) by auto 
+          using \<open>u ! n = min_set A\<close> assms(1,3) \<open>n < length e\<close>  apply_update.simps by metis
         have "A \<subseteq> {x. x < length e'}" using \<open>A \<subseteq> {x. x < length e}\<close> assms
           using energy_leq_def by auto 
         hence "set (nths e' A) \<noteq> {}" using \<open>A \<noteq>{}\<close> set_nths
@@ -257,7 +258,7 @@ proof -
       next
         case minus_one
         have nth: "(the (apply_inv_update u e)) ! n = apply_inv_component n u e" using apply_inv_update.simps
-          by (metis (no_types, lifting) \<open>n < length u\<close> add_0 assms len length_map nth_map nth_upt option.sel)
+          by (metis \<open>n < length u\<close> add_0 assms diff_add_inverse nth_map_upt option.sel)
 
         have n_minus_one: "List.enumerate 0 u ! n = (n,minus_one) " using minus_one
           by (simp add: \<open>n < length u\<close> nth_enumerate_eq) 
@@ -522,8 +523,9 @@ lemma inverse_monotonic:
                 qed
               qed
             qed
-            show ?thesis using plus_one True 
-              by (smt (verit) \<open>List.enumerate 0 u ! j = (j, u ! j)\<close> \<open>j < length u\<close> \<open>x \<le> e' ! i - 1\<close> case_prod_conv length_enumerate length_map nth_map_enumerate nth_mem update_component.simps(17)) 
+            show ?thesis
+              using plus_one True \<open>List.enumerate 0 u ! j = (j, u ! j)\<close> \<open>j < length u\<close> \<open>x \<le> e' ! i - 1\<close>
+              by (smt (verit, best) nth_map case_prod_conv length_enumerate length_map nth_mem update_component.simps(17))
           next
             case False
             hence "x = 0" using X
@@ -683,7 +685,7 @@ lemma leq_up_inv:
                 zero \<Rightarrow> (if n=m then (nth e n) else 0) | 
                 minus_one \<Rightarrow> (if n=m then (nth e n)+1 else 0) |
                 min_set A \<Rightarrow> (if n\<in>A then (nth e m) else 0)|
-                plus_one \<Rightarrow> (if n=m then (nth e n)-1 else 0))) (List.enumerate 0 u)))" using A nth_map_enumerate
+                plus_one \<Rightarrow> (if n=m then (nth e n)-1 else 0))) (List.enumerate 0 u)))" using A nth_map
           by (metis (no_types, lifting) \<open>n < length e\<close> assms(1) length_enumerate length_map nth_mem) 
         hence leq: "(e!n) +1 \<le> Max (set (map (\<lambda>(m,up). (case up of 
                 zero \<Rightarrow>(if n=m then (nth e n) else 0) | 
@@ -720,7 +722,7 @@ lemma leq_up_inv:
         proof-
           fix j
           assume "j \<in> A"
-          hence "j < length e" using assms
+          hence "j < length e" using assms \<open>n < length e\<close>
             by (metis \<open>min_set A = u ! n\<close> in_mono mem_Collect_eq) 
           hence "j < length [0..<length e]"
             by simp
@@ -762,7 +764,7 @@ lemma leq_up_inv:
                 minus_one \<Rightarrow> (if j=m then (nth e j)+1 else 0) |
                 min_set A \<Rightarrow> (if j\<in>A then (nth e m) else 0)|
                 plus_one \<Rightarrow> (if j=m then (nth e j)-1 else 0))) (List.enumerate 0 u)))"
-            using \<open>(List.enumerate 0 u)! n = (n, u ! n)\<close> nth_map_enumerate
+            using \<open>(List.enumerate 0 u)! n = (n, u ! n)\<close> nth_map
             by (metis (no_types, lifting) \<open>n < length e\<close> assms(1) in_set_conv_nth length_enumerate length_map)
 
           thus "e!n \<le> (inv_upd u e)!j"
@@ -770,7 +772,7 @@ lemma leq_up_inv:
             using \<open>inv_upd u e ! j = Max (set (map (\<lambda>(k, y). case y of zero \<Rightarrow>(if j=k then (nth e j) else 0) | minus_one \<Rightarrow> if j = k then e ! j + 1 else 0 | min_set A \<Rightarrow> if j \<in> A then e ! k else 0 | plus_one \<Rightarrow> if j = k then e ! j - 1 else 0) (List.enumerate 0 u)))\<close> by fastforce
         qed
 
-        have "A \<noteq> {} \<and> A \<subseteq> {x. x < length u}" using assms
+        have "A \<noteq> {} \<and> A \<subseteq> {x. x < length u}" using assms \<open>n < length e\<close>
           by (simp add: \<open>min_set A = u ! n\<close>)
         hence "A \<noteq> {} \<and> A \<subseteq> {x. x < length (inv_upd u e)}" using assms
           by auto
@@ -824,7 +826,7 @@ lemma leq_up_inv:
                 zero \<Rightarrow> (if n=m then (nth e n) else 0) | 
                 minus_one \<Rightarrow> (if n=m then (nth e n)+1 else 0) |
                 min_set A \<Rightarrow> (if n\<in>A then (nth e m) else 0)|
-                plus_one \<Rightarrow> (if n=m then (nth e n)-1 else 0))) (List.enumerate 0 u)))" using plus_one nth_map_enumerate A
+                plus_one \<Rightarrow> (if n=m then (nth e n)-1 else 0))) (List.enumerate 0 u)))" using plus_one nth_map A
           by (metis (no_types, lifting) \<open>n < length e\<close> assms(1) length_enumerate length_map nth_mem)
         hence leq: "(e!n) -1 \<le> Max (set (map (\<lambda>(m,up). (case up of 
                 zero \<Rightarrow> (if n=m then (nth e n) else 0) | 
@@ -1265,8 +1267,9 @@ lemma inv_up_leq:
               next
                 case min
                 from this obtain A where "u ! m = min_set A" by auto
-                hence "A\<noteq>{} \<and> A \<subseteq> {x. x < length e}" using assms
-                  by (simp add: \<open>length e = length u\<close>) 
+                hence "A\<noteq>{} \<and> A \<subseteq> {x. x < length e}"
+                  using  assms \<open>n < length e\<close> \<open>length e = length u\<close>
+                    \<open>m < length (List.enumerate 0 u)\<close> by force
                 then show ?thesis proof(cases "n \<in> A")
                   case True
                   hence "x = the (apply_update u e) ! m" using X \<open>u ! m = min_set A\<close> by simp
