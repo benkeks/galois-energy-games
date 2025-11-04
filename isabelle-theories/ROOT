@@ -1,14 +1,11 @@
 chapter AFP
 
-session EnergyGames = HOL +
+session Galois_Energy_Games = Parity_Game +
   options [timeout = 600]
 
   sessions
-    "HOL-Lattice"
     "HOL-Library"
-    "Coinductive"
     "Well_Quasi_Orders"
-    "Parity_Game"
     "Complete_Non_Orders"
 
   theories

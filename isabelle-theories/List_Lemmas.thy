@@ -83,17 +83,6 @@ next
    qed
 qed
 
-lemma nth_map_enumerate: 
-  shows "n < length xs \<Longrightarrow> (map f (List.enumerate 0 xs))!n = f((List.enumerate 0 xs)!n)"
-proof (induct xs arbitrary: n)
-  case Nil
-  then show ?case by simp
-next
-  case (Cons a xs)
-  then show ?case using less_Suc_eq_0_disj
-    by (metis length_enumerate nth_map) 
-qed
-
 lemma those_map_not_None: 
   assumes "\<forall>n< length xs. f (xs ! n) \<noteq> None" 
   shows "those (map f xs) \<noteq> None"
@@ -108,33 +97,12 @@ next
   have "those (map f xs) \<noteq> None" using Cons(1) assms those.simps
     by (smt (verit) Cons.prems Ex_less_Suc length_Cons less_trans_Suc nth_Cons_Suc)  
   then show ?case using those.simps \<open>f a = Some b\<close>
-    by (simp add: option.simps(5))
+    by (simp)
 qed
 
 lemma last_len:
   assumes "length xs = Suc n"
   shows "last xs = xs ! n"
-  using assms proof(induct xs arbitrary: n)
-  case Nil
-  then show ?case by simp
-next
-  case (Cons a xs)
-  show ?case proof(cases "xs = Nil")
-    case True
-    then show ?thesis
-      using Cons.prems by auto
-  next
-    case False
-    hence "\<exists>m. n = Suc m" using Cons
-      using not0_implies_Suc by auto 
-    from this obtain m where "n = Suc m" by auto
-    hence "length xs = Suc m" using Cons by simp
-    have "last (a#xs) = last xs"
-      using False by simp
-    also have "... = xs ! m" using Cons \<open>length xs = Suc m\<close> by simp
-    also have "... = (a#xs) ! (Suc m)" by simp
-    finally show ?thesis using \<open>n = Suc m\<close> by simp
-  qed
-qed
+by (metis One_nat_def assms diff_Suc_1' last_conv_nth length_0_conv nat.discI)
 
 end
