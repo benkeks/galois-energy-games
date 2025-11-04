@@ -257,7 +257,7 @@ proof -
       next
         case minus_one
         have nth: "(the (apply_inv_update u e)) ! n = apply_inv_component n u e" using apply_inv_update.simps
-          by (metis (no_types, lifting) \<open>n < length u\<close> add_0 assms len length_map nth_map nth_upt option.sel)
+          by (metis \<open>n < length u\<close> add_0 assms diff_add_inverse nth_map_upt option.sel)
 
         have n_minus_one: "List.enumerate 0 u ! n = (n,minus_one) " using minus_one
           by (simp add: \<open>n < length u\<close> nth_enumerate_eq) 
@@ -522,8 +522,9 @@ lemma inverse_monotonic:
                 qed
               qed
             qed
-            show ?thesis using plus_one True 
-              by (smt (verit) \<open>List.enumerate 0 u ! j = (j, u ! j)\<close> \<open>j < length u\<close> \<open>x \<le> e' ! i - 1\<close> case_prod_conv length_enumerate length_map nth_map_enumerate nth_mem update_component.simps(17)) 
+            show ?thesis
+              using plus_one True \<open>List.enumerate 0 u ! j = (j, u ! j)\<close> \<open>j < length u\<close> \<open>x \<le> e' ! i - 1\<close>
+              by (smt (verit, best) nth_map case_prod_conv length_enumerate length_map nth_mem update_component.simps(17))
           next
             case False
             hence "x = 0" using X
@@ -683,7 +684,7 @@ lemma leq_up_inv:
                 zero \<Rightarrow> (if n=m then (nth e n) else 0) | 
                 minus_one \<Rightarrow> (if n=m then (nth e n)+1 else 0) |
                 min_set A \<Rightarrow> (if n\<in>A then (nth e m) else 0)|
-                plus_one \<Rightarrow> (if n=m then (nth e n)-1 else 0))) (List.enumerate 0 u)))" using A nth_map_enumerate
+                plus_one \<Rightarrow> (if n=m then (nth e n)-1 else 0))) (List.enumerate 0 u)))" using A nth_map
           by (metis (no_types, lifting) \<open>n < length e\<close> assms(1) length_enumerate length_map nth_mem) 
         hence leq: "(e!n) +1 \<le> Max (set (map (\<lambda>(m,up). (case up of 
                 zero \<Rightarrow>(if n=m then (nth e n) else 0) | 
@@ -762,7 +763,7 @@ lemma leq_up_inv:
                 minus_one \<Rightarrow> (if j=m then (nth e j)+1 else 0) |
                 min_set A \<Rightarrow> (if j\<in>A then (nth e m) else 0)|
                 plus_one \<Rightarrow> (if j=m then (nth e j)-1 else 0))) (List.enumerate 0 u)))"
-            using \<open>(List.enumerate 0 u)! n = (n, u ! n)\<close> nth_map_enumerate
+            using \<open>(List.enumerate 0 u)! n = (n, u ! n)\<close> nth_map
             by (metis (no_types, lifting) \<open>n < length e\<close> assms(1) in_set_conv_nth length_enumerate length_map)
 
           thus "e!n \<le> (inv_upd u e)!j"
@@ -824,7 +825,7 @@ lemma leq_up_inv:
                 zero \<Rightarrow> (if n=m then (nth e n) else 0) | 
                 minus_one \<Rightarrow> (if n=m then (nth e n)+1 else 0) |
                 min_set A \<Rightarrow> (if n\<in>A then (nth e m) else 0)|
-                plus_one \<Rightarrow> (if n=m then (nth e n)-1 else 0))) (List.enumerate 0 u)))" using plus_one nth_map_enumerate A
+                plus_one \<Rightarrow> (if n=m then (nth e n)-1 else 0))) (List.enumerate 0 u)))" using plus_one nth_map A
           by (metis (no_types, lifting) \<open>n < length e\<close> assms(1) length_enumerate length_map nth_mem)
         hence leq: "(e!n) -1 \<le> Max (set (map (\<lambda>(m,up). (case up of 
                 zero \<Rightarrow> (if n=m then (nth e n) else 0) | 
